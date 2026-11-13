@@ -65,6 +65,7 @@ flowchart TD
 ├── 03-multimodal-triage/        # Cloud Run multipart image/PDF upload API + SSRF & magic-byte checks
 ├── 04-pubsub-policy-stream/     # Cloud Pub/Sub push worker running 8 policy checks per message
 ├── 05-bigquery-finops/          # Partitioned BigQuery schema, seeder & cost/accuracy SQL queries
+├── 06-adk-workflows/            # Google ADK 2.0 Workflows + Decisions API & live latency benchmark
 ├── .env.example                 # Sanitized environment template (zero fallbacks)
 ├── requirements.txt             # Python dependencies (google-genai >= 3.2.0)
 └── TUTORIAL.md                  # Step-by-step terminal runbook

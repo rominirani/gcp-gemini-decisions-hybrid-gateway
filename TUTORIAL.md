@@ -133,6 +133,15 @@ ORDER BY confidence_bucket DESC
 ./04-pubsub-policy-stream/deploy.sh "${PROJECT_ID}" "${REGION}"
 ```
 
+### Google ADK 2.0 Workflows + Decisions API ([`06-adk-workflows/`](06-adk-workflows/README.md))
+```bash
+cd 06-adk-workflows
+uv venv --python 3.12 .venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
+python benchmark_workflows.py
+```
+
 ---
 
 ## 4. Cleanup
