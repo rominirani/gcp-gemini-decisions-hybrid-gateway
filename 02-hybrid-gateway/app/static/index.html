@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Google Cloud Hybrid AI Gateway — Gemini Decisions API + Agent Platform</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #111827;
+      --panel-alt: #0f172a;
+      --border: #1f2937;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --blue: #3b82f6;
+      --red: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(17, 24, 39, 0.92);
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    header h1 { margin: 0; font-size: 1.1rem; }
+    header p { margin: 2px 0 0; font-size: 0.8rem; color: var(--muted); }
+    .pill {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #065f46;
+      background: #064e3b;
+      color: #6ee7b7;
+    }
+    main {
+      max-width: 1240px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 5fr 7fr;
+      gap: 24px;
+      flex: 1;
+    }
+    @media (max-width: 920px) { main { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .section-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .preset-btn {
+      width: 100%;
+      text-align: left;
+      background: var(--panel-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: border-color 0.15s;
+    }
+    .preset-btn:hover { border-color: var(--blue); }
+    .tag-fast { color: var(--emerald); font-weight: 700; margin-right: 6px; }
+    .tag-slow { color: var(--amber); font-weight: 700; margin-right: 6px; }
+    textarea {
+      width: 100%;
+      background: #060913;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.85rem;
+      resize: vertical;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      gap: 12px;
+    }
+    select {
+      background: var(--panel-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+    }
+    .primary-btn {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 18px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+    .primary-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .stat-box {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .stat-box .lbl { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; }
+    .stat-box .val { font-size: 0.95rem; font-weight: 700; margin-top: 4px; }
+    .bar-track {
+      width: 100%;
+      height: 10px;
+      background: #1f2937;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .bar-fill-s1 { height: 100%; background: var(--emerald); width: 0%; transition: width 0.4s; }
+    .bar-fill-s2 { height: 100%; background: var(--amber); width: 0%; transition: width 0.4s; }
+    .error-banner {
+      display: none;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--red);
+      color: #fca5a5;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      margin-bottom: 12px;
+    }
+    pre {
+      background: #060913;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.76rem;
+      overflow-x: auto;
+      max-height: 260px;
+      margin: 0;
+    }
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 14px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Google Cloud Hybrid AI Gateway</h1>
+      <p>System 1: Gemini Decisions API (gemini-decision-1, 0 output tokens) &bull; System 2: Gemini Enterprise Agent Platform (gemini-3.8-flash)</p>
+    </div>
+    <div class="pill mono">Threshold: Conf &ge; 0.85 &amp; P(Auto) &ge; 0.80</div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="section-label">1. Select Preset or Enter Custom Payload</div>
+      <button type="button" class="preset-btn" data-tier="STANDARD" data-query="Where is my order #19028? Can you tell me when it arrives?">
+        <span class="tag-fast mono">[Fast Path]</span> Order Tracking Lookup
+      </button>
+      <button type="button" class="preset-btn" data-tier="STANDARD" data-query="Please cancel my monthly subscription before the next billing cycle.">
+        <span class="tag-fast mono">[Fast Path]</span> Subscription Cancellation
+      </button>
+      <button type="button" class="preset-btn" data-tier="PREMIUM" data-query="I forgot my password and my 2FA authenticator code expired. Please send a recovery link.">
+        <span class="tag-fast mono">[Fast Path]</span> MFA &amp; Account Recovery
+      </button>
+      <button type="button" class="preset-btn" data-tier="ENTERPRISE" data-query="CRITICAL: Checkout database connection pool exhausted, returning HTTP 500 errors across all regions after schema migration.">
+        <span class="tag-slow mono">[Slow Path]</span> Production Database Outage
+      </button>
+      <button type="button" class="preset-btn" data-tier="ENTERPRISE" data-query="Does section 4.2 of your Data Processing Addendum permit cross-border EU customer telemetry exports to multi-region BigQuery datasets?">
+        <span class="tag-slow mono">[Slow Path]</span> Cross-Border Legal &amp; DPA Inquiry
+      </button>
+
+      <div style="margin-top: 16px;">
+        <div class="section-label">Custom Request Text</div>
+        <textarea id="queryInput" class="mono" rows="4">Where is my order #19028? Can you tell me when it arrives?</textarea>
+        <div class="controls">
+          <select id="customerTier">
+            <option value="STANDARD">Tier: STANDARD</option>
+            <option value="PREMIUM">Tier: PREMIUM</option>
+            <option value="ENTERPRISE">Tier: ENTERPRISE</option>
+          </select>
+          <button type="button" id="submitBtn" class="primary-btn">Evaluate &amp; Route</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div id="errorBox" class="error-banner mono"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:12px;">
+        <span id="routeBadge" class="mono" style="font-size:0.82rem; font-weight:700; color:var(--muted);">Awaiting Request...</span>
+        <span id="totalLatency" class="mono" style="font-size:0.8rem; color:var(--muted);">Total: -- ms</span>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="lbl">Queue Choice</div>
+          <div id="statQueue" class="val mono">--</div>
+        </div>
+        <div class="stat-box">
+          <div class="lbl">Confidence</div>
+          <div id="statConf" class="val mono">--%</div>
+        </div>
+        <div class="stat-box">
+          <div class="lbl">P(Auto-Resolve)</div>
+          <div id="statAuto" class="val mono">--%</div>
+        </div>
+        <div class="stat-box">
+          <div class="lbl">Total Cost</div>
+          <div id="statCost" class="val mono">$0.000000</div>
+        </div>
+      </div>
+
+      <div class="stat-box" style="margin-bottom:16px;">
+        <div class="lbl">Routing Verdict</div>
+        <div id="routingReason" class="mono" style="font-size:0.78rem; margin-top:6px; color:#d1d5db;">Submit a query to inspect calibrated routing telemetry.</div>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <div class="section-label">Latency Waterfall</div>
+        <div style="margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; font-size:0.76rem;" class="mono">
+            <span>System 1: Gemini Decisions API (gemini-decision-1)</span>
+            <span id="s1Ms">0 ms (0 out tokens)</span>
+          </div>
+          <div class="bar-track"><div id="s1Bar" class="bar-fill-s1"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:0.76rem;" class="mono">
+            <span>System 2: Gemini Enterprise Agent Platform (gemini-3.8-flash)</span>
+            <span id="s2Ms">0 ms (Bypassed)</span>
+          </div>
+          <div class="bar-track"><div id="s2Bar" class="bar-fill-s2"></div></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Verbatim Gateway Response JSON</div>
+        <pre id="jsonOutput" class="mono">// Response payload will appear here...</pre>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Google Cloud Reference Architecture &bull; Gemini Decisions API &amp; Gemini Enterprise Agent Platform &bull; MIT License
+  </footer>
+
+  <script>
+    (function () {
+      const queryInput = document.getElementById("queryInput");
+      const customerTier = document.getElementById("customerTier");
+      const submitBtn = document.getElementById("submitBtn");
+      const errorBox = document.getElementById("errorBox");
+
+      document.querySelectorAll(".preset-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          queryInput.value = btn.getAttribute("data-query") || "";
+          customerTier.value = btn.getAttribute("data-tier") || "STANDARD";
+        });
+      });
+
+      submitBtn.addEventListener("click", async function () {
+        const query = queryInput.value.trim();
+        if (!query) return;
+
+        errorBox.style.display = "none";
+        errorBox.textContent = "";
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Evaluating...";
+
+        try {
+          const resp = await fetch("/api/v1/triage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: query, customer_tier: customerTier.value })
+          });
+          const data = await resp.json();
+          if (!resp.ok) {
+            throw new Error(data.detail || ("HTTP " + resp.status));
+          }
+          renderResponse(data);
+        } catch (err) {
+          errorBox.textContent = "Request error: " + (err && err.message ? err.message : String(err));
+          errorBox.style.display = "block";
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Evaluate & Route";
+        }
+      });
+
+      function renderResponse(data) {
+        const isFast = data.route_taken === "FAST_PATH_DECISIONS";
+        const badge = document.getElementById("routeBadge");
+        badge.textContent = isFast
+          ? "FAST PATH — Gemini Decisions API"
+          : "SLOW PATH — Escalated to Agent Platform";
+        badge.style.color = isFast ? "#10b981" : "#f59e0b";
+
+        document.getElementById("totalLatency").textContent = "Total: " + data.overall_latency_ms + " ms";
+        document.getElementById("statQueue").textContent = data.system1_decision.department;
+        document.getElementById("statConf").textContent = (data.system1_decision.department_confidence * 100).toFixed(1) + "%";
+        document.getElementById("statAuto").textContent = (data.system1_decision.auto_resolve_probability * 100).toFixed(1) + "%";
+        document.getElementById("statCost").textContent = "$" + Number(data.overall_cost_usd).toFixed(6);
+        document.getElementById("routingReason").textContent = data.routing_reason;
+
+        const s1Lat = data.system1_decision.latency_ms;
+        document.getElementById("s1Ms").textContent = s1Lat + " ms (" + data.system1_decision.output_tokens + " out tokens)";
+        if (isFast || !data.system2_reasoning) {
+          document.getElementById("s1Bar").style.width = "100%";
+          document.getElementById("s2Ms").textContent = "0 ms (Bypassed)";
+          document.getElementById("s2Bar").style.width = "0%";
+        } else {
+          const s2Lat = data.system2_reasoning.latency_ms;
+          const total = Math.max(s1Lat + s2Lat, 1);
+          document.getElementById("s1Bar").style.width = Math.max(8, Math.round((s1Lat / total) * 100)) + "%";
+          document.getElementById("s2Ms").textContent = s2Lat + " ms (" + data.system2_reasoning.output_tokens + " out tokens)";
+          document.getElementById("s2Bar").style.width = "100%";
+        }
+
+        document.getElementById("jsonOutput").textContent = JSON.stringify(data, null, 2);
+      }
+    })();
+  </script>
+</body>
+</html>
